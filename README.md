@@ -97,9 +97,9 @@ VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
 ## 🧑‍💻 Author
 
-Developed by **[Your Name]**  
+Developed by **Dhan Belgica**  
 Instructor @ Cavite State University  
-🔗 GitHub: [github.com/yourusername](https://github.com/yourusername)
+🔗 GitHub: [https://github.com/Chooeychloe/]
 
 ---
 
