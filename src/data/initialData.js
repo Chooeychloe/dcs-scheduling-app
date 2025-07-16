@@ -8,4 +8,4 @@ export const initialSubjects = ['Math 101', 'Science 202', 'History 303', 'Engli
 
 export const initialSections = ['Section A', 'Section B', 'Section C', 'Section D', 'Section E'];
 
-export const initialFaculty = ['Dr. Smith', 'Prof. Johnson', 'Ms. Davis', 'Mr. Brown', 'Dr. White'];
+export const initialFaculty = ['Edan A. Belgica', 'Clarissa Rostrollo', 'Clarence Salvador', 'Alvina Ramallosa', 'Alvin Catalo'];

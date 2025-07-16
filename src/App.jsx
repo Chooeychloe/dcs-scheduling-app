@@ -63,14 +63,26 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans text-gray-900 p-4 sm:p-6 md:p-8">
-      <header className="text-center mb-10">
-        <h1 className="text-4xl font-extrabold text-blue-700">
-          Faculty Room Scheduling System
-        </h1>
-        <p className="text-lg text-gray-600 mt-2">
-          Efficiently manage room and class schedules
-        </p>
-      </header>
+      <header className="text-center lg:text-left mb-10 flex flex-col items-center lg:flex-row lg:justify-center gap-4">
+  <img
+    width="100"
+    height="100"
+    src="/dhan.jpg"
+    alt="Jovelina Gift"
+    className="rounded-full shadow-md"
+  />
+  <div>
+    <h1 className="text-4xl font-extrabold text-blue-700">
+      DCS Faculty Room Scheduling
+    </h1>
+    <p className="text-lg text-gray-600 mt-2">
+      Pa-birthday ko sayo to Jovelina, Thank you ka naman!
+    </p>
+     <p className="text-lg text-gray-600 mt-2">
+     Sana di ka na mahirapan sa pag-schedule ng rooms mo!
+    </p>
+  </div>
+</header>
 
       <main className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
         <div>
