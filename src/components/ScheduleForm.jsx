@@ -21,6 +21,8 @@ const ScheduleForm = ({
   schedules,
   editingSchedule,
 }) => {
+  const [program, setProgram] = useState('');
+  const [yearLevel, setYearLevel] = useState('');
   const [subject, setSubject] = useState('');
   const [section, setSection] = useState('');
   const [facultyMember, setFacultyMember] = useState('');
@@ -34,6 +36,8 @@ const ScheduleForm = ({
 
   useEffect(() => {
     if (editingSchedule) {
+      setProgram(editingSchedule.program || '');
+      setYearLevel(editingSchedule.yearLevel || '');
       setSubject(editingSchedule.subject);
       setSection(editingSchedule.section);
       setFacultyMember(editingSchedule.faculty);
@@ -61,6 +65,11 @@ const ScheduleForm = ({
       setMessage('');
     }
   }, [startTime, duration]);
+
+  useEffect(() => {
+    setSubject('');
+    setSection('');
+  }, [program, yearLevel]);
 
   const checkConflict = useCallback(
     (newSchedule) => {
@@ -90,7 +99,7 @@ const ScheduleForm = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!subject || !section || !facultyMember || !startTime || !duration || !selectedRoom || !selectedDay) {
+    if (!program || !yearLevel || !subject || !section || !facultyMember || !startTime || !duration || !selectedRoom || !selectedDay) {
       setMessage('Please fill in all required fields.');
       setMessageType('error');
       return;
@@ -104,6 +113,8 @@ const ScheduleForm = ({
 
     const newSchedule = {
       id: editingSchedule ? editingSchedule.id : Date.now(),
+      program,
+      yearLevel,
       subject,
       section,
       faculty: facultyMember,
@@ -126,6 +137,8 @@ const ScheduleForm = ({
     setMessageType('success');
 
     // Reset form
+    setProgram('');
+    setYearLevel('');
     setSubject('');
     setSection('');
     setFacultyMember('');
@@ -169,12 +182,14 @@ const ScheduleForm = ({
         {editingSchedule ? 'Edit Schedule' : 'Add New Schedule'}
       </h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {renderSearchableSelect('Program', <FaUser className="text-blue-500" />, program, setProgram, ['Information Technology', 'Computer Science'], 'Select Program')}
+        {renderSearchableSelect('Year Level', <FaUser className="text-blue-500" />, yearLevel, setYearLevel, ['1st Year', '2nd Year', '3rd Year', '4th Year'], 'Select Year Level')}
         {renderSearchableSelect('Day', <FaCalendarDay className="text-blue-500" />, selectedDay, setSelectedDay, days, 'Select Day')}
         {renderSearchableSelect('Room', <FaDoorOpen className="text-blue-500" />, selectedRoom, setSelectedRoom, rooms, 'Select Room')}
-        {renderSearchableSelect('Subject', <FaBook className="text-blue-500" />, subject, setSubject, subjects, 'Select Subject')}
-        {renderSearchableSelect('Section', <FaLayerGroup className="text-blue-500" />, section, setSection, sections, 'Select Section')}
+        {renderSearchableSelect('Subject', <FaBook className="text-blue-500" />, subject, setSubject, program && yearLevel ? subjects[program]?.[yearLevel] || [] : [], 'Select Subject')}
+        {renderSearchableSelect('Section', <FaLayerGroup className="text-blue-500" />, section, setSection, program && yearLevel ? sections[program]?.[yearLevel] || [] : [], 'Select Section')}
         {renderSearchableSelect('Faculty', <FaChalkboardTeacher className="text-blue-500" />, facultyMember, setFacultyMember, faculty, 'Select Faculty')}
-        
+
         <div className="flex flex-col">
           <label className="mb-1 text-sm font-medium text-gray-700 flex items-center gap-2">
             <FaClock className="text-blue-500" /> Start Time
