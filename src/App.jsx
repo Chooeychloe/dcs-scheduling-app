@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import ScheduleForm from "./components/ScheduleForm";
 import TimeSlotGrid from "./components/TimeSlotGrid";
 import ExportPDFButton from "./components/ExportPDFButton";
+import SchedulePreviewModal from "./components/PreviewModal";
+
 import {
   initialRooms,
   initialDays,
@@ -9,6 +11,7 @@ import {
   initialSections,
   initialFaculty,
 } from "./data/initialData";
+
 import { db } from "../src/firebase";
 import {
   collection,
@@ -29,6 +32,17 @@ const App = () => {
       .flatMap((year) => Object.values(year).flat())
       .filter(Boolean)[0]
   );
+
+  // Modal states
+  const [showModal, setShowModal] = useState(false);
+  const [modalFilter, setModalFilter] = useState({ type: null, value: null });
+
+  const filteredForModal = () => {
+    if (modalFilter?.type && modalFilter?.value) {
+      return schedules.filter((s) => s[modalFilter.type] === modalFilter.value);
+    }
+    return schedules;
+  };
 
   const schedulesCollection = collection(db, "schedules");
 
@@ -53,6 +67,7 @@ const App = () => {
   };
 
   const handleEdit = (schedule) => setEditingSchedule(schedule);
+
   const handleDelete = async (id) => {
     setSchedules((prev) => prev.filter((s) => s.id !== id));
     await deleteDoc(doc(db, "schedules", id.toString()));
@@ -94,72 +109,87 @@ const App = () => {
             editingSchedule={editingSchedule}
           />
 
-          {/* Export Filters */}
-          <div className="mt-6 w-80 flex flex-col gap-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Room
-              </label>
-              <select
-                value={selectedRoom}
-                onChange={(e) => setSelectedRoom(e.target.value)}
-                className="w-full border rounded p-2 text-sm"
-              >
-                {initialRooms.map((r) => (
-                  <option key={r}>{r}</option>
+          {/* Export and Preview Filters */}
+          <div className="mt-6 w-80 flex flex-col gap-3">
+            {/* Room Filter */}
+            <label className="text-sm font-medium">Room</label>
+            <select
+              value={selectedRoom}
+              onChange={(e) => setSelectedRoom(e.target.value)}
+              className="border p-2 rounded"
+            >
+              {initialRooms.map((r) => (
+                <option key={r}>{r}</option>
+              ))}
+            </select>
+            <ExportPDFButton schedules={schedules} filterBy={{ type: "room", value: selectedRoom }} />
+            <button
+              onClick={() => {
+                setModalFilter({ type: "room", value: selectedRoom });
+                setShowModal(true);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              Preview by Room
+            </button>
+
+            {/* Faculty Filter */}
+            <label className="text-sm font-medium">Faculty</label>
+            <select
+              value={selectedFaculty}
+              onChange={(e) => setSelectedFaculty(e.target.value)}
+              className="border p-2 rounded"
+            >
+              {initialFaculty.map((f) => (
+                <option key={f}>{f}</option>
+              ))}
+            </select>
+            <ExportPDFButton schedules={schedules} filterBy={{ type: "faculty", value: selectedFaculty }} />
+            <button
+              onClick={() => {
+                setModalFilter({ type: "faculty", value: selectedFaculty });
+                setShowModal(true);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              Preview by Faculty
+            </button>
+
+            {/* Section Filter */}
+            <label className="text-sm font-medium">Section</label>
+            <select
+              value={selectedSection}
+              onChange={(e) => setSelectedSection(e.target.value)}
+              className="border p-2 rounded"
+            >
+              {Object.values(initialSections)
+                .flatMap((year) => Object.values(year).flat())
+                .map((sec) => (
+                  <option key={sec}>{sec}</option>
                 ))}
-              </select>
-            </div>
+            </select>
+            <ExportPDFButton schedules={schedules} filterBy={{ type: "section", value: selectedSection }} />
+            <button
+              onClick={() => {
+                setModalFilter({ type: "section", value: selectedSection });
+                setShowModal(true);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              Preview by Section
+            </button>
 
-            <ExportPDFButton
-              schedules={schedules}
-              filterBy={{ type: "room", value: selectedRoom }}
-            />
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Faculty
-              </label>
-              <select
-                value={selectedFaculty}
-                onChange={(e) => setSelectedFaculty(e.target.value)}
-                className="w-full border rounded p-2 text-sm"
-              >
-                {initialFaculty.map((f) => (
-                  <option key={f}>{f}</option>
-                ))}
-              </select>
-            </div>
-
-            <ExportPDFButton
-              schedules={schedules}
-              filterBy={{ type: "faculty", value: selectedFaculty }}
-            />
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Section
-              </label>
-              <select
-                value={selectedSection}
-                onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full border rounded p-2 text-sm"
-              >
-                {Object.values(initialSections)
-                  .flatMap((year) => Object.values(year).flat())
-                  .map((sec) => (
-                    <option key={sec}>{sec}</option>
-                  ))}
-              </select>
-            </div>
-
-            <ExportPDFButton
-              schedules={schedules}
-              filterBy={{ type: "section", value: selectedSection }}
-            />
-            <div className="mt-4">
-              <ExportPDFButton schedules={schedules} />
-            </div>
+            {/* Export and Preview All */}
+            <ExportPDFButton schedules={schedules} />
+            <button
+              onClick={() => {
+                setModalFilter({ type: null, value: null });
+                setShowModal(true);
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition mt-1"
+            >
+              Preview All
+            </button>
           </div>
         </div>
 
@@ -175,6 +205,18 @@ const App = () => {
           onDelete={handleDelete}
         />
       </main>
+
+      {/* Modal Preview */}
+      <SchedulePreviewModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        schedules={filteredForModal()}
+        title={
+          modalFilter?.type
+            ? `Schedules by ${modalFilter.type}: ${modalFilter.value}`
+            : "All Schedules"
+        }
+      />
     </div>
   );
 };
