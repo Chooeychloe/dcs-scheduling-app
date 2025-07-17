@@ -148,7 +148,7 @@ const ScheduleForm = ({
     setSelectedDay('');
   };
 
-  const durationOptions = Array.from({ length: 24 }, (_, i) => 30 * (i + 1));
+  const durationOptions = Array.from({ length: 12 }, (_, i) => 30 * (i + 1));
 
   const renderSearchableSelect = (label, icon, value, setValue, options, placeholder) => {
     const formattedOptions = options.map((opt) => ({ value: opt, label: opt }));
