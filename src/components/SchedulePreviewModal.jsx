@@ -9,21 +9,21 @@ const ExportPDFButton = ({ schedules, filterBy }) => {
     const doc = new jsPDF();
     doc.setFontSize(16);
 
-    const title = filterBy
-      ? `Schedules by ${filterBy.charAt(0).toUpperCase() + filterBy.slice(1)}`
-      : "All Schedules";
-
+    let title = "All Schedules";
     let filteredSchedules = schedules;
 
     if (filterBy) {
+      title = `Schedules by ${filterBy.charAt(0).toUpperCase() + filterBy.slice(1)}`;
+
+      // Group and flatten
       const grouped = {};
       for (const sched of schedules) {
-        const key = sched[filterBy];
+        const key = sched[filterBy] || "Unknown";
         if (!grouped[key]) grouped[key] = [];
         grouped[key].push(sched);
       }
 
-      // Flatten grouped for export
+      // Flatten into array: include group label row then its schedules
       filteredSchedules = Object.entries(grouped).flatMap(([group, items]) => [
         { isGroup: true, groupLabel: group },
         ...items,
@@ -49,10 +49,7 @@ const ExportPDFButton = ({ schedules, filterBy }) => {
 
     const data = filteredSchedules.map((s) => {
       if (s.isGroup) {
-        return [
-          `${filterBy.toUpperCase()}: ${s.groupLabel}`,
-          "", "", "", "", "", "", "", "", ""
-        ];
+        return [`${filterBy.toUpperCase()}: ${s.groupLabel}`, "", "", "", "", "", "", "", "", ""];
       }
 
       return [
@@ -74,20 +71,19 @@ const ExportPDFButton = ({ schedules, filterBy }) => {
       head: headers,
       body: data,
       didParseCell: function (data) {
-        if (
-          data.row.raw[1] === "" &&
-          data.row.raw[2] === "" &&
-          data.row.raw[0]?.startsWith(`${filterBy?.toUpperCase()}:`)
-        ) {
+        const isGroupRow = data.row.raw[1] === "" && data.row.raw[2] === "";
+        if (isGroupRow) {
           data.cell.styles.fontStyle = "bold";
           data.cell.colSpan = 10;
         }
       },
     });
 
+    // Save PDF locally
     const filename = `schedule_${filterBy || "all"}_${Date.now()}.pdf`;
     doc.save(filename);
 
+    // Save metadata to Firestore
     try {
       await addDoc(collection(db, "exports"), {
         filename,
@@ -104,9 +100,9 @@ const ExportPDFButton = ({ schedules, filterBy }) => {
   return (
     <button
       onClick={handleExportPDF}
-      className="bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+      className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
     >
-      Export as PDF {filterBy ? `(${filterBy})` : "(All)"}
+      Export as PDF {filterBy ? `(${filterBy})` : ""}
     </button>
   );
 };

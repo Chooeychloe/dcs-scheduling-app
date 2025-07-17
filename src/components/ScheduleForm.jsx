@@ -20,9 +20,10 @@ const ScheduleForm = ({
   onAddSchedule,
   schedules,
   editingSchedule,
+  selectedProgram,
+  selectedSemester,
+  selectedYearLevel,
 }) => {
-  const [program, setProgram] = useState('');
-  const [yearLevel, setYearLevel] = useState('');
   const [subject, setSubject] = useState('');
   const [section, setSection] = useState('');
   const [facultyMember, setFacultyMember] = useState('');
@@ -36,8 +37,6 @@ const ScheduleForm = ({
 
   useEffect(() => {
     if (editingSchedule) {
-      setProgram(editingSchedule.program || '');
-      setYearLevel(editingSchedule.yearLevel || '');
       setSubject(editingSchedule.subject);
       setSection(editingSchedule.section);
       setFacultyMember(editingSchedule.faculty);
@@ -65,11 +64,6 @@ const ScheduleForm = ({
       setMessage('');
     }
   }, [startTime, duration]);
-
-  useEffect(() => {
-    setSubject('');
-    setSection('');
-  }, [program, yearLevel]);
 
   const checkConflict = useCallback(
     (newSchedule) => {
@@ -99,7 +93,7 @@ const ScheduleForm = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!program || !yearLevel || !subject || !section || !facultyMember || !startTime || !duration || !selectedRoom || !selectedDay) {
+    if (!subject || !section || !facultyMember || !startTime || !duration || !selectedRoom || !selectedDay) {
       setMessage('Please fill in all required fields.');
       setMessageType('error');
       return;
@@ -113,8 +107,6 @@ const ScheduleForm = ({
 
     const newSchedule = {
       id: editingSchedule ? editingSchedule.id : Date.now(),
-      program,
-      yearLevel,
       subject,
       section,
       faculty: facultyMember,
@@ -123,6 +115,9 @@ const ScheduleForm = ({
       endTime,
       room: selectedRoom,
       day: selectedDay,
+      program: selectedProgram,
+      semester: selectedSemester,
+      yearLevel: selectedYearLevel,
     };
 
     const conflict = checkConflict(newSchedule);
@@ -137,8 +132,6 @@ const ScheduleForm = ({
     setMessageType('success');
 
     // Reset form
-    setProgram('');
-    setYearLevel('');
     setSubject('');
     setSection('');
     setFacultyMember('');
@@ -148,7 +141,7 @@ const ScheduleForm = ({
     setSelectedDay('');
   };
 
-  const durationOptions = Array.from({ length: 12 }, (_, i) => 30 * (i + 1));
+  const durationOptions = Array.from({ length: 12 }, (_, i) => 30 * (i + 1)); // max 360
 
   const renderSearchableSelect = (label, icon, value, setValue, options, placeholder) => {
     const formattedOptions = options.map((opt) => ({ value: opt, label: opt }));
@@ -182,12 +175,10 @@ const ScheduleForm = ({
         {editingSchedule ? 'Edit Schedule' : 'Add New Schedule'}
       </h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {renderSearchableSelect('Program', <FaUser className="text-blue-500" />, program, setProgram, ['Information Technology', 'Computer Science'], 'Select Program')}
-        {renderSearchableSelect('Year Level', <FaUser className="text-blue-500" />, yearLevel, setYearLevel, ['1st Year', '2nd Year', '3rd Year', '4th Year'], 'Select Year Level')}
         {renderSearchableSelect('Day', <FaCalendarDay className="text-blue-500" />, selectedDay, setSelectedDay, days, 'Select Day')}
         {renderSearchableSelect('Room', <FaDoorOpen className="text-blue-500" />, selectedRoom, setSelectedRoom, rooms, 'Select Room')}
-        {renderSearchableSelect('Subject', <FaBook className="text-blue-500" />, subject, setSubject, program && yearLevel ? subjects[program]?.[yearLevel] || [] : [], 'Select Subject')}
-        {renderSearchableSelect('Section', <FaLayerGroup className="text-blue-500" />, section, setSection, program && yearLevel ? sections[program]?.[yearLevel] || [] : [], 'Select Section')}
+        {renderSearchableSelect('Subject', <FaBook className="text-blue-500" />, subject, setSubject, subjects, 'Select Subject')}
+        {renderSearchableSelect('Section', <FaLayerGroup className="text-blue-500" />, section, setSection, sections, 'Select Section')}
         {renderSearchableSelect('Faculty', <FaChalkboardTeacher className="text-blue-500" />, facultyMember, setFacultyMember, faculty, 'Select Faculty')}
 
         <div className="flex flex-col">
